@@ -22,7 +22,9 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "timer.h"
+#include "input_processing.h"
+#include "input_reading.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -51,7 +53,31 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_TIM2_Init(void);
 /* USER CODE BEGIN PFP */
+void initialize() {
+	//first, all button goes to 1
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, SET);
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, SET);
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_10, SET);
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_11, SET);
 
+	//first, all light goes to 1
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, SET);
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_2, SET);
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_3, SET);
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, SET);
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, SET);
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, SET);
+
+	//all led 7 segment goes to 0
+	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, SET);
+	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_1, SET);
+	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_2, SET);
+	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, SET);
+	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_4, SET);
+	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, SET);
+	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, SET);
+
+}
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -89,7 +115,7 @@ int main(void)
   MX_GPIO_Init();
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
-
+  HAL_TIM_Base_Start_IT(&htim2);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -97,7 +123,8 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-
+	  fsm_for_button_processing();
+	  fsm_for_mode_processing();
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
@@ -234,7 +261,12 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
+	if (htim->Instance == TIM2) {
+		button_reading();
+		timer_run();
+	}
+}
 /* USER CODE END 4 */
 
 /**
